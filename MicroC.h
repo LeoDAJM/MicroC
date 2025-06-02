@@ -54,21 +54,18 @@ public:
 #endif // RAM64K_HPP
 
 class UBC {
+private:
+    static void execute(uint8_t& X, uint8_t& Y, uint8_t& cw, uint8_t& S, uint8_t& A, uint8_t& B) {
+        A = (X & -((cw >> 4) & 1)) ^ -((cw >> 2) & 1);
+        B = (Y & -((cw >> 3) & 1)) ^ -((cw >> 1) & 1);
+		adder8(A, B, S, cw);
+    }
 public:
-    UBC(uint8_t* X, uint8_t* Y, uint8_t* cw, uint8_t* S) {
-
-    }
-    void onChange() {
-        uint8_t A = (X & -((cw >> 4) & 1)) ^ -((cw >> 2) & 1);
-        uint8_t B = (Y & -((cw >> 3) & 1)) ^ -((cw >> 1) & 1);
-		adder8(A, B, &S, &cw);
-    }
-
-    void adder8(uint8_t A, uint8_t B, uint8_t* result, uint8_t* control) {
+    static void adder8(uint8_t& A, uint8_t& B, uint8_t& result, uint8_t& control) {
         // Control Word (Co, CW[6], Cin)
         uint8_t G = {0}; // Generate
         uint8_t P = {0}; // Propagate
-        uint8_t C = *control; // Carries
+        uint8_t C = control; // Carries
 
         P = A ^ B;
         G = A & B;
@@ -78,8 +75,8 @@ public:
             // C[i] = G[i-1] | (P[i-1] & C[i-1])
             C |= ((G | (P & C)) & (1 << (i - 1))) << 1;
         }
-        *control |= ((G | (P & C)) & 0x80);
-        *result = P ^ C;
+        control |= ((G | (P & C)) & 0x80);
+        result = P ^ C;
     }
 };
 
