@@ -44,12 +44,19 @@ const std::unordered_map<uint8_t, uint16_t> ALUS_decoder = {
 	{0x3 ,0b0110}, {0x4 ,0b0110} , {0x5 ,0b0000},
 	{0x6 ,0b0010}, {0x7 ,0b0100} , {0x8 ,0b0110},
 	{0x9 ,0b0110}, {0xA ,0b0110} , {0xB ,0b0110},
-};*/
+};
 const std::unordered_map<uint8_t, uint16_t> ALUS_decoder = {
 	{0x0 ,MUXALU.at("UBC") + 0x0}, {0x1 ,MUXALU.at("UBC") + 0x10} , {0x2 ,MUXALU.at("UBC") + 0x8},
 	{0x3 ,MUXALU.at("UBC") + 0x15}, {0x4 ,MUXALU.at("UBC") + 0x14} , {0x5 ,MUXALU.at("AND") + 0x0},
 	{0x6 ,MUXALU.at("OR") + 0x0}, {0x7 ,MUXALU.at("XOR") + 0x0} , {0x8 ,MUXALU.at("UBC") + 0x18},
 	{0x9 ,MUXALU.at("UBC") + 0x1B}, {0xA ,MUXALU.at("UBC") + 0x11} , {0xB ,MUXALU.at("UBC") + 0x12},
+};} */
+
+const std::unordered_map<uint8_t, uint16_t> ALUS_decoder = {
+	{ALUS_parser.at("CLR") ,MUXALU.at("UBC") + 0x0},		{ALUS_parser.at("IN A") ,MUXALU.at("UBC") + 0x10} ,	{ALUS_parser.at("IN B") ,MUXALU.at("UBC") + 0x8},
+	{ALUS_parser.at("NEG") ,MUXALU.at("UBC") + 0x15},		{ALUS_parser.at("NOT") ,MUXALU.at("UBC") + 0x14} ,	{ALUS_parser.at("AND") ,MUXALU.at("AND") + 0x0},
+	{ALUS_parser.at("OR") ,MUXALU.at("OR") + 0x0},		{ALUS_parser.at("XOR") ,MUXALU.at("XOR") + 0x0} ,		{ALUS_parser.at("ADD") ,MUXALU.at("UBC") + 0x18},
+	{ALUS_parser.at("SUB") ,MUXALU.at("UBC") + 0x1B},		{ALUS_parser.at("INC") ,MUXALU.at("UBC") + 0x11} ,	{ALUS_parser.at("DEC") ,MUXALU.at("UBC") + 0x12},
 };
 
 /* OK
@@ -155,7 +162,7 @@ inline void BS(uint8_t& A, uint16_t& cw, uint8_t& batch, uint8_t& result) {
 	1 1 0 -> Des. Izq. Arith.
 	1 1 1 -> Des. Izq. Log.
 	batch1
-	x x x x x x CF Cin2
+	x x x x x VF CF Cin2
 	*/
 	switch (cw & 0x7)
 	{
@@ -193,7 +200,8 @@ inline void BS(uint8_t& A, uint16_t& cw, uint8_t& batch, uint8_t& result) {
 		std::cout << "Error S[MUX TD]" << std::endl;
 		break;
 	}
-
+	batch &= 0xFB;
+	batch |= (((result >> 6) ^ batch) << 1) & 0x04;
 }
 
 inline void ALU (uint8_t& A, uint8_t& B, uint16_t& cw, uint8_t& batch, uint8_t& R) {
